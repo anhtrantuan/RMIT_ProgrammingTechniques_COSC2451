@@ -1,30 +1,30 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
+#include <ctype.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "rpn.h"
 #include "stack.h"
+#include "utility.h"
 
 bool errorOccurs;
 
-const char* RPN_OPERATORS[8] = {"+", "-", "*", "/", "**", "#", "_", "||"};
 const RPN_FUCTION_POINTER RPN_FUCTION_POINTERS[8] = {&add, &subtract, &multiply, &divide, &power, &max, &min, &distance};
 
 double rpn_eval(char *exp) {
-	errorOccurs = true;
-
     // create a stack based on the length of the expression
     // this is just a guess of the space we are going to need
     // the stack will automatically increase its size if necessary
-    int exp_length = strlen(exp);
+    int exp_length = strlen(exp), numOfVars = 0;
     struct stack *s = create_stack(exp_length / 2);
-    char *token, *copy;
+    char *token, *copy, **vars = NULL;
     double value, left, right;
     
     // we need to make a copy of the expression to not "destroy" it while
     // we parse it
-    copy = malloc(sizeof(char) *exp_length);
+    copy = malloc(sizeof(char) * exp_length);
     strcpy(copy, exp);
 
     // tokenise the copy of the expression based on space characters
@@ -32,24 +32,61 @@ double rpn_eval(char *exp) {
 
     // while there is another token to process
     while (token != NULL) {
+        errorOccurs = true;
+
+        if (token[strlen(token) - 1] == '\n') token[strlen(token) - 1] = '\0';
+
         // sscanf is like scanf, but works on strings instead of stdin
-        // if the token is an value       
-        if (sscanf(token, "%lf", &value) > 0) {
-            // push the value on the stack
-            push(s, value);
+        // if the token is an value
+        if (isNumeric(token) && sscanf(token, "%lf", &value) > 0) {
+            for (int i = 0; i < numOfVars; i++) {
+                setVariable(vars[i], value);
+            }
+
+            free(vars);
+            numOfVars = 0;
 
             errorOccurs = false;
+
+            // push the result back on the stack
+            push(s, value);
+        } else if (variableExists(token)) {
+            char *operator = strtok(NULL, " ");
+
+            if (operator == NULL && vars == NULL) {
+                value = getVariable(token);
+
+                errorOccurs = !variableExists(token);
+
+                // push the result back on the stack
+                push(s, value);
+            } else if (strcmp(operator, "=") == 0) {
+                vars = (char**) realloc(vars, (numOfVars + 1) * sizeof(char*));
+
+                vars[numOfVars] = token;
+
+                numOfVars++;
+
+                errorOccurs = false;
+            } else {
+                free(vars);
+                numOfVars = 0;
+            }
         } else {
             // the token is not an value, therefore it must be an operator (hopefully)
            
             // pop the right and left operands
             right = pop(s);
             left = pop(s);
-            if (token[strlen(token) - 1] == '\n') token[strlen(token) - 1] = '\0';
+
+            if (s->top != -1) {
+                token = NULL;
+                continue;
+            }
 
             // evaluate the operator on left and right
-            for (int i = 0; i < sizeof(RPN_OPERATORS) / sizeof(RPN_OPERATORS[0]); i++) {
-            	if (strcmp(token, RPN_OPERATORS[i]) == 0) {
+            for (int i = 0; i < sizeof(OPERATORS) / sizeof(OPERATORS[0]); i++) {
+            	if (strcmp(token, OPERATORS[i]) == 0) {
             		value = (*RPN_FUCTION_POINTERS[i])(left, right);
 
             		errorOccurs = false;
@@ -68,6 +105,9 @@ double rpn_eval(char *exp) {
     }
 
     value = pop(s);
+
+    if (s->top != -1) errorOccurs = true;
+
     free(copy);
     free_stack(s);
 

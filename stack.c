@@ -25,19 +25,22 @@ void push(struct stack *s, double value) {
     s->data[s->top] = value;
 }
 
-int peek(struct stack *s) {
+double peek(struct stack *s) {
     return s->data[s->top];
 }
 
-int pop(struct stack *s) {
+double pop(struct stack *s) {
     s->top--;
     return s->data[s->top + 1];
 }
 
 void resize(struct stack *s, int new_length) {
-    int *old_data = s->data;
+    double *old_data = s->data;
+
     printf("in resize %i, %i\n", s->length, new_length);
+
     s->data = malloc(sizeof(int) * new_length);
+
     for (int i = 0; i <= s->top; i++) {
         s->data[i] = old_data[i];
     }
@@ -49,7 +52,8 @@ void resize(struct stack *s, int new_length) {
 void print_stack(struct stack *s) {
     printf("%i/%i: ", s->top, s->length);
     for (int i = 0; i <= s->top; i++) {
-        printf("%i ", s->data[i]);
+
+        printf("%lf ", s->data[i]);
     }
     
 }

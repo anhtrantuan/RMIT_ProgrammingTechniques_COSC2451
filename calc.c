@@ -1,10 +1,13 @@
+#include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <string.h>
-#include <stdbool.h>
+
 #include "rpn.h"
 #include "stack.h"
+
+bool errorOccurs;
 
 int main (int argc, char *argv[]) {
 	char *str;
@@ -54,15 +57,17 @@ int main (int argc, char *argv[]) {
 				
 				if (echoOn) printf("%s", str);
 				
-				if (strlen(str) > 0) {
-					if (batchOn) {
-						printf("s3255350>>> ");
-					}
+				if (!(strlen(str) == 0 || (strlen(str) == 1 && str[0] == '\n'))) {
+					if (strlen(str) > 0) {
+						if (batchOn) {
+							printf("s3255350>>> ");
+						}
 
-					if (errorOccurs) {
-						printf("Invalid RPN expression!\n");
-					} else {
-						printf("%.4lf\n", value);
+						if (errorOccurs) {
+							printf("Invalid RPN expression!\n");
+						} else {
+							printf("%.6lf\n", value);
+						}
 					}
 				}
 			} else if (strcmp(argv[argc - 1], "in") == 0) {

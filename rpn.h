@@ -1,9 +1,10 @@
 #ifndef RPN
+
 #define RPN
 
 typedef double (*RPN_FUCTION_POINTER)(double, double);
 
-extern bool errorOccurs;
+extern const RPN_FUCTION_POINTER RPN_FUCTION_POINTERS[8];
 
 double rpn_eval(char *exp);
 
