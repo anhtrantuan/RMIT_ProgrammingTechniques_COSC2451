@@ -19,7 +19,7 @@ double rpn_eval(char *exp) {
     // the stack will automatically increase its size if necessary
     int exp_length = strlen(exp), numOfVars = 0;
     struct stack *s = create_stack(exp_length / 2);
-    char *token, *copy, **vars = NULL;
+    char *token, *copy, *vars[10] = {NULL};
     double value, left, right;
     
     // we need to make a copy of the expression to not "destroy" it while
@@ -30,56 +30,52 @@ double rpn_eval(char *exp) {
     // tokenise the copy of the expression based on space characters
     token = strtok(copy, " ");
 
+	bool previousIsOperator;
+
     // while there is another token to process
     while (token != NULL) {
         errorOccurs = true;
+		previousIsOperator = false;
 
         if (token[strlen(token) - 1] == '\n') token[strlen(token) - 1] = '\0';
 
         // sscanf is like scanf, but works on strings instead of stdin
         // if the token is an value
         if (isNumeric(token) && sscanf(token, "%lf", &value) > 0) {
-            for (int i = 0; i < numOfVars; i++) {
-                setVariable(vars[i], value);
-            }
+			for (int i = 0; i < numOfVars; i++) {
+				setVariable(vars[i], value);
+				vars[i] = NULL;
+			}
 
-            free(vars);
-            numOfVars = 0;
+			numOfVars = 0;
 
             errorOccurs = false;
 
             // push the result back on the stack
             push(s, value);
-        } else if (variableExists(token)) {
-            char *operator = strtok(NULL, " ");
+        } else if (variableValid(token)) {
+			char operator = *(token + strlen(token) + 1);
 
-            if (operator == NULL && vars == NULL) {
-                value = getVariable(token);
+			if (operator == '=') {
+				vars[numOfVars++] = token;
 
-                errorOccurs = !variableExists(token);
+				errorOccurs = false;
+			} else {
+				value = getVariable(token);
 
-                // push the result back on the stack
-                push(s, value);
-            } else if (strcmp(operator, "=") == 0) {
-                vars = (char**) realloc(vars, (numOfVars + 1) * sizeof(char*));
+				errorOccurs = !variableExists(token);
 
-                vars[numOfVars] = token;
-
-                numOfVars++;
-
-                errorOccurs = false;
-            } else {
-                free(vars);
-                numOfVars = 0;
-            }
-        } else {
+				// push the result back on stack
+				push(s, value);
+			}
+        } else if (isOperator(token)) {
             // the token is not an value, therefore it must be an operator (hopefully)
            
             // pop the right and left operands
             right = pop(s);
             left = pop(s);
 
-            if (s->top != -1) {
+            if (previousIsOperator && s->top < -1) {
                 token = NULL;
                 continue;
             }
@@ -90,12 +86,16 @@ double rpn_eval(char *exp) {
             		value = (*RPN_FUCTION_POINTERS[i])(left, right);
 
             		errorOccurs = false;
+					previousIsOperator = true;
             	}
             }
 
             // push the result back on the stack
             push(s, value);
-        }
+		 } else if (strcmp(token, "=") != 0) {
+			 token = NULL;
+			 continue;
+		 }
 
         // get the next token
         // strtok has a state: when called with NULL as the first argument,

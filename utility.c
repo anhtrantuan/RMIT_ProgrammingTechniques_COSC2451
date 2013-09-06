@@ -11,6 +11,7 @@ bool errorOccurs;
 const char* OPERATORS[8] = {"+", "-", "*", "/", "**", "#", "_", "||"};
 const char* VARIABLE_NAMES[10] = {"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9"};
 double VARIABLES[10] = {0};
+bool VARIABLES_STATUS[10] = {false};
 
 int numberOfVariables = 0;
 
@@ -22,10 +23,19 @@ bool isNumeric(char *exp) {
     return *p == '\0';
 }
 
+bool isOperator(char *exp) {
+	for (int i = 0; i < sizeof(OPERATORS) / sizeof(OPERATORS[0]); i++) {
+		if (strcmp(exp, OPERATORS[i]) == 0) return true;
+	}
+
+	return false;
+}
+
 bool setVariable(char *name, double value) {
 	for (int i = 0; i < 10; i++) {
 		if (strcmp(VARIABLE_NAMES[i], name) == 0) {
 			VARIABLES[i] = value;
+			VARIABLES_STATUS[i] = true;
 
 			return true;
 		}
@@ -34,9 +44,17 @@ bool setVariable(char *name, double value) {
 	return false;
 }
 
-bool variableExists(char *name) {
+bool variableValid(char *name) {
 	for (int i = 0; i < 10; i++) {
 		if (strcmp(VARIABLE_NAMES[i], name) == 0) return true;
+	}
+
+	return false;
+}
+
+bool variableExists(char *name) {
+	for (int i = 0; i < 10; i++) {
+		if (strcmp(VARIABLE_NAMES[i], name) == 0 && VARIABLES_STATUS[i]) return true;
 	}
 
 	return false;

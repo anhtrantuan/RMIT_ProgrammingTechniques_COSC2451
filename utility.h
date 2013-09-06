@@ -8,7 +8,11 @@ extern const char* OPERATORS[8];
 
 bool isNumeric(char *exp);
 
+bool isOperator(char *exp);
+
 bool setVariable(char *name, double value);
+
+bool variableValid(char *name);
 
 bool variableExists(char *name);
 
