@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +9,9 @@
 
 bool errorOccurs;
 
-const char* OPERATORS[8] = {"+", "-", "*", "/", "**", "#", "_", "||"};
+const char* OPERATORS[8] = {"**", "*", "/", "+", "-", "#", "_", "||"};
+const FUCTION_POINTER FUCTION_POINTERS[8] = {&power, &multiply, &divide, &add, &subtract, &max, &min, &distance};
+
 const char* VARIABLE_NAMES[10] = {"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9"};
 double VARIABLES[10] = {0};
 bool VARIABLES_STATUS[10] = {false};
@@ -29,6 +32,10 @@ bool isOperator(char *exp) {
 	}
 
 	return false;
+}
+
+bool isParenthese(char *exp) {
+	return strcmp(exp, "(") || strcmp(exp, ")");
 }
 
 bool setVariable(char *name, double value) {
@@ -67,3 +74,36 @@ double getVariable(char *name) {
 
 	return 0;
 }
+
+double add(double left, double right) {
+	return left + right;
+}
+
+double subtract(double left, double right) {
+	return left - right;
+}
+
+double multiply(double left, double right) {
+	return left * right;
+}
+
+double divide(double left, double right) {
+	return left / right;
+}
+
+double power(double left, double right) {
+	return pow(left, right);
+}
+
+double max(double left, double right) {
+	return fmax(left, right);
+}
+
+double min(double left, double right) {
+	return fmin(left, right);
+}
+
+double distance(double left, double right) {
+	return abs(left - right);
+}
+

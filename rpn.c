@@ -1,5 +1,4 @@
 #include <ctype.h>
-#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,16 +10,14 @@
 
 bool errorOccurs;
 
-const RPN_FUCTION_POINTER RPN_FUCTION_POINTERS[8] = {&add, &subtract, &multiply, &divide, &power, &max, &min, &distance};
-
 double rpn_eval(char *exp) {
     // create a stack based on the length of the expression
     // this is just a guess of the space we are going to need
     // the stack will automatically increase its size if necessary
     int exp_length = strlen(exp), numOfVars = 0;
-    struct stack *s = create_stack(exp_length / 2);
+    struct double_stack *s = create_double_stack(exp_length / 2);
     char *token, *copy, *vars[10] = {NULL};
-    double value, left, right;
+    double value = 0, left = 0, right = 0;
     
     // we need to make a copy of the expression to not "destroy" it while
     // we parse it
@@ -50,7 +47,7 @@ double rpn_eval(char *exp) {
             errorOccurs = false;
 
             // push the result back on the stack
-            push(s, value);
+            push_double(s, value);
         } else if (variableValid(token)) {
 			char operator = *(token + strlen(token) + 1);
 
@@ -64,14 +61,14 @@ double rpn_eval(char *exp) {
 				errorOccurs = !variableExists(token);
 
 				// push the result back on stack
-				push(s, value);
+				push_double(s, value);
 			}
         } else if (isOperator(token)) {
             // the token is not an value, therefore it must be an operator (hopefully)
            
             // pop the right and left operands
-            right = pop(s);
-            left = pop(s);
+            right = pop_double(s);
+            left = pop_double(s);
 
             if (previousIsOperator && s->top < -1) {
                 token = NULL;
@@ -81,7 +78,7 @@ double rpn_eval(char *exp) {
             // evaluate the operator on left and right
             for (int i = 0; i < sizeof(OPERATORS) / sizeof(OPERATORS[0]); i++) {
             	if (strcmp(token, OPERATORS[i]) == 0) {
-            		value = (*RPN_FUCTION_POINTERS[i])(left, right);
+            		value = (*FUCTION_POINTERS[i])(left, right);
 
             		errorOccurs = false;
 					previousIsOperator = true;
@@ -89,57 +86,27 @@ double rpn_eval(char *exp) {
             }
 
             // push the result back on the stack
-            push(s, value);
+            push_double(s, value);
 		 } else if (strcmp(token, "=") != 0) {
 			 token = NULL;
 			 continue;
 		 }
 
+		if (errorOccurs) return value;
+
         // get the next token
         // strtok has a state: when called with NULL as the first argument,
         // it will continue to tokenise the previous string given to it
         token = strtok(NULL, " ");
-        //print_stack(s);
     }
 
-    value = pop(s);
+    value = pop_double(s);
 
     if (s->top != -1) errorOccurs = true;
 
     free(copy);
-    free_stack(s);
+    free_double_stack(s);
 
     return value;
 }
 
-double add(double left, double right) {
-	return left + right;
-}
-
-double subtract(double left, double right) {
-	return left - right;
-}
-
-double multiply(double left, double right) {
-	return left * right;
-}
-
-double divide(double left, double right) {
-	return left / right;
-}
-
-double power(double left, double right) {
-	return pow(left, right);
-}
-
-double max(double left, double right) {
-	return fmax(left, right);
-}
-
-double min(double left, double right) {
-	return fmin(left, right);
-}
-
-double distance(double left, double right) {
-	return abs(left - right);
-}
