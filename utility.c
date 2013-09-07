@@ -26,8 +26,12 @@ bool isNumeric(char *exp) {
     return *p == '\0';
 }
 
+int getNumberOfOperators() {
+	return sizeof(OPERATORS) / sizeof(OPERATORS[0]);
+}
+
 bool isOperator(char *exp) {
-	for (int i = 0; i < sizeof(OPERATORS) / sizeof(OPERATORS[0]); i++) {
+	for (int i = 0; i < getNumberOfOperators(); i++) {
 		if (strcmp(exp, OPERATORS[i]) == 0) return true;
 	}
 
@@ -35,7 +39,15 @@ bool isOperator(char *exp) {
 }
 
 bool isParenthese(char *exp) {
-	return strcmp(exp, "(") || strcmp(exp, ")");
+	return strcmp(exp, "(") == 0 || strcmp(exp, ")") == 0;
+}
+
+int getOperatorPrecedence(char *op) {
+	for (int i = 0; i < getNumberOfOperators(); i++) {
+		if (strcmp(op, OPERATORS[i]) == 0) return i + 1;
+	}
+
+	return -1;
 }
 
 bool setVariable(char *name, double value) {

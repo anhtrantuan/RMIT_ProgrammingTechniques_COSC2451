@@ -27,12 +27,11 @@ double rpn_eval(char *exp) {
     // tokenise the copy of the expression based on space characters
     token = strtok(copy, " ");
 
-	bool previousIsOperator;
+	bool previousIsOperator = false;
 
     // while there is another token to process
     while (token != NULL) {
         errorOccurs = true;
-		previousIsOperator = false;
 
         // sscanf is like scanf, but works on strings instead of stdin
         // if the token is an value
@@ -45,6 +44,7 @@ double rpn_eval(char *exp) {
 			numOfVars = 0;
 
             errorOccurs = false;
+			previousIsOperator = false;
 
             // push the result back on the stack
             push_double(s, value);
@@ -63,6 +63,8 @@ double rpn_eval(char *exp) {
 				// push the result back on stack
 				push_double(s, value);
 			}
+
+			previousIsOperator = false;
         } else if (isOperator(token)) {
             // the token is not an value, therefore it must be an operator (hopefully)
            
@@ -76,7 +78,7 @@ double rpn_eval(char *exp) {
             }
 
             // evaluate the operator on left and right
-            for (int i = 0; i < sizeof(OPERATORS) / sizeof(OPERATORS[0]); i++) {
+            for (int i = 0; i < getNumberOfOperators(); i++) {
             	if (strcmp(token, OPERATORS[i]) == 0) {
             		value = (*FUCTION_POINTERS[i])(left, right);
 

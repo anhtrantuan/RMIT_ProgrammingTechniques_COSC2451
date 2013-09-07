@@ -1,14 +1,14 @@
 CC=gcc
 CFLAGS=-Wall -std=c99 -g -pg
 LDLIBS=-lm
-SOURCES = utility.c stack.c rpn.c in.c calc.c
-OBJS = $(patsubst %.c,%.o,$(SOURCES))
 HEADERS = utility.h stack.h rpn.h in.h
-EXECS = calc
+SOURCES = $(patsubst %.h,%.c,$(HEADERS)) calc.c
+OBJS = $(patsubst %.c,%.o,$(SOURCES))
+EXEC = calc
 
-all: $(EXECS)
+all: $(EXEC)
 
-calc: utility.o stack.o rpn.o in.o calc.o
+calc: $(OBJS)
 	$(CC) $(CFLAGS) -o calc utility.o stack.o rpn.o in.o calc.o $(LDLIBS)
 
 $(OBJS): $(HEADERS)
@@ -19,4 +19,4 @@ clean:
 	
 .PHONY: cleanall
 cleanall:
-	rm -f *.o *~ $(EXECS)
+	rm -f *.o *~ $(EXEC)

@@ -12,7 +12,7 @@
 bool errorOccurs;
 
 int main (int argc, char *argv[]) {
-	int length = 255, option;
+	int length = 1024, option;
 	char str[length];
 	bool batchOn, echoOn, invalid, isRPN, isIn;
 
@@ -73,10 +73,14 @@ int main (int argc, char *argv[]) {
 					}
 			
 					if (errorOccurs) {
-						printf("Invalid RPN expression!\n");
+						if (isRPN) {
+							printf("Invalid RPN expression!\n");
+						} else if (isIn) {
+							printf("Invalid Inorder expression!\n");
+						}
 					} else {
 						if (echoOn) printf("%s = ", str);
-						printf("%.6lf\n", value);
+						printf("%lf\n", value);
 					}
 				}
 			}

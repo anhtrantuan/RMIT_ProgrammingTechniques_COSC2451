@@ -28,15 +28,16 @@ void free_double_stack(struct double_stack *s) {
 }
 
 void free_operator_stack(struct operator_stack *s) {
-	for (int i = 0; i < s->length; i++) {
+	for (int i = 0; i < s->top + 1; i++) {
 		free(s->data[i]);
 	}
+
 	free(s->data);
 	free(s);
 }
 
 void push_double(struct double_stack *s, double value) {
-    if (s->top == s->length - 1) {
+    if (s->top >= s->length - 1) {
         resize_double(s, s->length * RESIZE_FACTOR);
     }
     
@@ -45,11 +46,12 @@ void push_double(struct double_stack *s, double value) {
 }
 
 void push_operator(struct operator_stack *s, char *value) {
-	if (s->top == s->length -1) {
+	if (s->top >= s->length -1) {
 		resize_operator(s, s->length * RESIZE_FACTOR);
 	}
 
 	s->top++;
+	if (s->data[s->top] != NULL) free(s->data[s->top]);
 	s->data[s->top] = (char *) malloc(sizeof(char) * (strlen(value) + 1));
 	strcpy(s->data[s->top], value);
 }
@@ -58,7 +60,7 @@ double peek_double(struct double_stack *s) {
     return s->data[s->top];
 }
 
-char * peek_opeartor(struct operator_stack *s) {
+char * peek_operator(struct operator_stack *s) {
 	return s->data[s->top];
 }
 

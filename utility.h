@@ -12,9 +12,13 @@ extern const char* OPERATORS[8];
 
 bool isNumeric(char *exp);
 
+int getNumberOfOperators();
+
 bool isOperator(char *exp);
 
 bool isParenthese(char *exp);
+
+int getOperatorPrecedence(char *exp);
 
 bool setVariable(char *name, double value);
 
