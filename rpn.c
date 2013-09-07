@@ -89,7 +89,9 @@ double rpn_eval(char *exp) {
 
             // push the result back on the stack
             push_double(s, value);
-		 } else if (strcmp(token, "=") != 0) {
+		 } else if (strcmp(token, "=") == 0) {
+			 errorOccurs = false;
+		 } else {
 			 token = NULL;
 			 continue;
 		 }
