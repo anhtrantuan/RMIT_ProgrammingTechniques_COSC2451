@@ -51,7 +51,6 @@ void push_operator(struct operator_stack *s, char *value) {
 	}
 
 	s->top++;
-	if (s->data[s->top] != NULL) free(s->data[s->top]);
 	s->data[s->top] = (char *) malloc(sizeof(char) * (strlen(value) + 1));
 	strcpy(s->data[s->top], value);
 }
