@@ -12,11 +12,9 @@
 bool errorOccurs;
 
 int main (int argc, char *argv[]) {
-	char *str;
 	int length = 255, option;
+	char str[length];
 	bool batchOn, echoOn, invalid, isRPN, isIn;
-
-	str = malloc(sizeof(char) * length);
 
 	batchOn = false;
 	echoOn = false;
@@ -53,26 +51,27 @@ int main (int argc, char *argv[]) {
 		isIn = strcmp(argv[argc - 1], "--in") == 0;
 
 		while (1) {
-			if (batchOn) printf("s3255350>>> ");
+			if (batchOn && isatty(STDIN_FILENO)) printf("s3255350>>> ");
 
-			if (fgets(str, length, stdin) == NULL) {
-				break;
-			}
+			char *input = fgets(str, length, stdin);
+			if (input == NULL || input == (char *) EOF)	break;
 
-			double value = 0;
-			if (isRPN) {
-				value = rpn_eval(str);
-			} else if (isIn) {
-				value = in_eval(str);
-			}
-			
-			if (!(strlen(str) == 0 || (strlen(str) == 1 && str[0] == '\n'))) {
+			if (!(strlen(str) == 0 || strcmp(str, "\n") == 0 || strcmp(str, "\r\n") == 0)) {
 				if (strlen(str) > 0) {
+					if (str[strlen(str) - 2] == '\r') str[strlen(str) - 2] = '\0';
 					if (str[strlen(str) - 1] == '\n') str[strlen(str) - 1] = '\0';
+
 					if (batchOn) {
 						printf("s3255350>>> ");
 					}
 
+					double value = 0;
+					if (isRPN) {
+						value = rpn_eval(str);
+					} else if (isIn) {
+						value = in_eval(str);
+					}
+			
 					if (errorOccurs) {
 						printf("Invalid RPN expression!\n");
 					} else {
@@ -81,8 +80,6 @@ int main (int argc, char *argv[]) {
 					}
 				}
 			}
-
-			strcpy(str, "");
 		}
 	}
 

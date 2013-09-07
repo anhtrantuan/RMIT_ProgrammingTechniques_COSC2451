@@ -24,7 +24,7 @@ double rpn_eval(char *exp) {
     
     // we need to make a copy of the expression to not "destroy" it while
     // we parse it
-    copy = malloc(sizeof(char) * exp_length);
+    copy = (char *) malloc(sizeof(char) * exp_length);
     strcpy(copy, exp);
 
     // tokenise the copy of the expression based on space characters
@@ -36,8 +36,6 @@ double rpn_eval(char *exp) {
     while (token != NULL) {
         errorOccurs = true;
 		previousIsOperator = false;
-
-        if (token[strlen(token) - 1] == '\n') token[strlen(token) - 1] = '\0';
 
         // sscanf is like scanf, but works on strings instead of stdin
         // if the token is an value
